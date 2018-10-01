@@ -11,7 +11,10 @@ let User = require('../models/User');
 //Login User
 exports.login = (req, res, next) => {
 
-    User.findOne({ username: req.body.username }, function (err, user) {
+    let waitTill = new Date(new Date().getTime() + 1 * 1000);
+    while(waitTill > new Date()){}
+    
+    User.findOne({ email: req.body.email }, function (err, user) {
         if (err) return res.status(500).send('Sunucuda bir hata var.\n' + err);
         if (!user) return res.status(401).send({ auth: false, message: "Kullanici Bulunamadi !" });
         

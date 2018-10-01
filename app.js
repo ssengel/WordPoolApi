@@ -11,6 +11,7 @@ let routes = require('./routes/mainRoute');
 
 
 
+
 //middleware
 
 app.use(bodyParser.json());
@@ -25,9 +26,9 @@ app.use(tokenController);
 routes.mainRoute(app);
 
 // error handling
-app.use((err, req, res, next) => { 
+app.use((err, req, res, next) => {
     res.status(err.status || 500);
-    res.send(err.message);
+    res.send(err.message || "Beklenmedik bir hata.");
 })
 
 module.exports = app;
