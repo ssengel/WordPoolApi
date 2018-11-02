@@ -1,7 +1,6 @@
 let Word = require('../models/Word')
 
 exports.createWord = (word, userId) => {
-    console.log("hello DBO");
     
     let mWord = Word(word);
     mWord.userId = userId;
@@ -59,7 +58,7 @@ exports.deleteWord = (userId, wordId) =>{
     return new Promise((resolve, reject) =>{
         Word.findOneAndRemove({userId: userId, _id: wordId})
             .then(word =>{
-                resolve(word)
+                resolve(word);
             })
             .catch(err => {
                 reject(err);
@@ -70,8 +69,8 @@ exports.deleteWord = (userId, wordId) =>{
 exports.updateWord = (userId, wordId, word) =>{
     return new Promise((resolve, reject) =>{
         Word.findOneAndUpdate({userId: userId, _id: wordId}, word)
-            .then(wordU =>{
-                resolve(wordU)
+            .then(word =>{
+                resolve(word)
             })
             .catch(err => {
                 reject(err);

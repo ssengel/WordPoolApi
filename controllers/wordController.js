@@ -1,28 +1,31 @@
 let WordDBO = require("../dbOperations/wordDBO");
 let badRequest = require("../helpers/badRequestError");
+let OperationDBO = require('../dbOperations/operationDBO');
+let to = require('../helpers/to');
 
-exports.createWord = (req, res, next) => {
-  let mWord = req.body;
-  let mUserId = req.params.id;
 
-  if (!mWord.eng || !mWord.tr) {
-    return next(badRequest("Kelimenin Bazi Bilgileri Eksik !!"));
-    // return res.status(400).send('Kelimenin bazi bilgileri eksik');
-  }
+exports.createWord = async (req, res, next) => {
+    
+    const userId = req.user._id;
+    let mWord = req.body;
 
-  WordDBO.createWord(mWord, mUserId)
-    .then(word => {
-      res.status(200).send(word);
-    })
-    .catch(err => {
-      next(err);
-    });
+    if (!mWord.eng || !mWord.tr) {
+      return next(badRequest("Kelimenin Bazi Bilgileri Eksik !!"));
+    }
+
+    [err, word] = await to(WordDBO.createWord(mWord, userId));
+    if(err) next(err);
+
+    if(req.headers['device'] === 'angular'){
+        [err, op] = await to(OperationDBO.createOperation(userId, word._id, "insert"));
+        if(err) next(err);
+    }
+
+    res.status(200).send(word);
+
 };
 
 exports.getAllWords = (req, res, next) => {
-  //simulation delay
-  var waitTill = new Date(new Date().getTime() + 1 * 1000);
-  while (waitTill > new Date()) {}
   WordDBO.getAllWords()
     .then(words => {
       res.status(200).send(words);
@@ -33,7 +36,8 @@ exports.getAllWords = (req, res, next) => {
 };
 
 exports.getWords = (req, res, next) => {
-  let userId = req.params.id;
+
+  const userId = req.user._id;
 
   WordDBO.getWords(userId)
     .then(words => {
@@ -45,8 +49,9 @@ exports.getWords = (req, res, next) => {
 };
 
 exports.getWord = (req, res, next) => {
-  let userId = req.params.userId;
-  let wordId = req.params.wordId;
+
+  const userId = req.user._id;
+  const wordId = req.params.wordId;
 
   WordDBO.getWord(userId, wordId)
     .then(word => {
@@ -59,9 +64,9 @@ exports.getWord = (req, res, next) => {
 
 exports.updateWord = (req, res, next) => {
 
-  let userId = req.params.userId;
-  let wordId = req.params.wordId;
-  let mWord = req.body;
+  const userId = req.user._id;
+  const wordId = req.params.wordId;
+  const mWord = req.body;
 
   if (!mWord.eng || !mWord.tr) {
     return next(badRequest("Kelimenin Bazi Bilgileri Eksik !!"));
@@ -69,6 +74,9 @@ exports.updateWord = (req, res, next) => {
   
   WordDBO.updateWord(userId, wordId, mWord)
     .then(word => {
+      if(req.headers['device'] === 'angular'){
+        OperationDBO.createOperation( userId, word._id,"update")
+      }
       res.status(200).send(word);
     })
     .catch(err => {
@@ -77,12 +85,19 @@ exports.updateWord = (req, res, next) => {
 };
 
 exports.deleteWord = (req, res, next) => {
-  let userId = req.params.userId;
-  let wordId = req.params.wordId;
+
+  const userId = req.user._id;
+  const wordId = req.params.wordId;
 
   WordDBO.deleteWord(userId, wordId)
     .then(word => {
-      res.status(200).send(word);
+        OperationDBO.deleteOperationsByWordId(userId, wordId)
+            .then(op =>{
+              if(req.headers['device'] === 'angular'){
+                OperationDBO.createOperation(userId, word._id, "delete")
+              }
+              res.status(200).send(word);
+            })
     })
     .catch(err => {
       next(err);

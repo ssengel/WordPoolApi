@@ -1,5 +1,8 @@
 let auth = require('../controllers/authController');
 let word = require('../controllers/wordController');
+let pool =require('../controllers/poolController');
+let pWord = require('../controllers/pWordController');
+let operation = require('../controllers/operationController');
 
 exports.mainRoute = (app) => {
 
@@ -8,10 +11,24 @@ exports.mainRoute = (app) => {
         .post('/register', auth.register)
 
     //word
-    app.get('/word', word.getAllWords)
-        .post('/user/:id/word', word.createWord)
-        .get('/user/:id/word', word.getWords)
-        .get('/user/:userId/word/:wordId', word.getWord)
-        .delete('/user/:userId/word/:wordId', word.deleteWord)
-        .put('/user/:userId/word/:wordId', word.updateWord)
+    app.get('/allWords', word.getAllWords)
+        .post('/word', word.createWord)
+        .get('/word', word.getWords)
+        .get('/word/:wordId', word.getWord)
+        .delete('/word/:wordId', word.deleteWord)
+        .put('/word/:wordId', word.updateWord)
+
+    //pool, pword
+    app.get('/pool', pool.getAllPools)
+        .post('/pool', pool.createPool)
+        .get('/pool/:poolId/pword', pWord.getPWordsByPoolId)
+        .post('/pool/:poolId/pword', pWord.createPWord)
+        .get('/pword',pWord.getAllPWords)
+
+    //operations
+    app.get('/allOperations', operation.getAllOperations) // test 
+        .get('/operation', operation.getOperations)
+        .delete('/operation',operation.deleteOperations)
+        .delete('/operation/:operationId', operation.deleteOperation)
+        // .delete('/operation/word:wordId', operation.deleteOperationsByWordId)
 }
