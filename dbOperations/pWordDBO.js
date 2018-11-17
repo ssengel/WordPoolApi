@@ -30,8 +30,6 @@ exports.createPWord = (pWord, poolId) => {
 }
 
 exports.getPWordsByPoolId = (poolId) => {
-    console.log("hello pWordDBO => getPWordsByPoolId");
-
     return new Promise((resolve, reject) => {
         PWord.find({poolId: poolId})
             .then(pWords => {
@@ -42,3 +40,12 @@ exports.getPWordsByPoolId = (poolId) => {
             })
     })
 }
+
+exports.deletePWord = (poolId, pWordId) => {
+    return PWord.findOneAndDelete({poolId: poolId, _id: pWordId});
+}
+
+exports.updatePWord = (poolId, pWordId, pWord) =>{
+    return PWord.findOneAndUpdate({_id:pWordId, poolId:poolId}, pWord, { "new": true});
+}
+

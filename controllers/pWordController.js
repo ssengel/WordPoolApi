@@ -1,6 +1,6 @@
 let PWordDBO = require('../dbOperations/pWordDBO');
 let badRequest = require("../helpers/badRequestError");
-
+let to = require("../helpers/to")
 
 exports.getAllPWords = (req, res, next) => {
     
@@ -42,4 +42,27 @@ exports.getPWordsByPoolId = (req, res, next) => {
         .catch(err =>{
             next(err);
         })
+}
+
+exports.deletePWord = async (req, res, next) => {
+    const poolId = req.params.poolId;
+    const pWordId = req.params.pWordId;
+
+    [err, data] = await to(PWordDBO.deletePWord(poolId, pWordId));
+    if(err){
+        return next(err);
+    }
+
+    res.status(200).send(data);
+}
+
+exports.updatePWord = async (req, res, next) => {
+    const poolId = req.params.poolId;
+    const pWordId = req.params.pWordId;
+    const pWord = req.body;
+    [err, data] = await to(PWordDBO.updatePWord(poolId, pWordId, pWord));
+    if(err){
+        return next(err);
+    }
+    res.status(200).send(data);
 }

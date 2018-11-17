@@ -19,9 +19,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cors())
-
 app.use(tokenController);
 
+app.use((req, res, next) =>{
+    if(!req.body)
+        console.log(req.body)
+    next()
+})
 
 //routes
 routes.mainRoute(app);
@@ -29,7 +33,8 @@ routes.mainRoute(app);
 // error handling
 app.use((err, req, res, next) => {
 
-    console.log(err);
+    console.log("Message:", err.message);
+    console.log("Reason:", err.reason);
     
     if(err instanceof MongoError){
         return res.status(502).send({type: "Database Error", message: err.message});

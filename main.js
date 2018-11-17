@@ -1,5 +1,5 @@
-var app = require('./app');
-var http = require('http');
+let app = require('./app');
+let http = require('http');
 
 let server = http.createServer(app);
 

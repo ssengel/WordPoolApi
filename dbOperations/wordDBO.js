@@ -42,6 +42,7 @@ exports.getWords = (userId) => {
     })
 }
 
+
 exports.getWord = (userId, wordId) =>{
     return new Promise((resolve, reject) =>{
         Word.findOne({userId: userId, _id: wordId})
@@ -76,4 +77,21 @@ exports.updateWord = (userId, wordId, word) =>{
                 reject(err);
             })
     })
+}
+
+exports.getWordsFromTo = (userId, from, to) => {
+    return new Promise((resolve, reject) =>{
+        Word.find({userId:userId}).skip(from).limit(to-from)
+            .exec((err, items) => {
+                Word.count({},(err, countWords) => {
+                    resolve({totalWords: countWords, words: items})    
+                })
+            })
+        
+    })
+}
+
+exports.getWordsByName = (userId, key) =>{
+    const regex = new RegExp(key);
+    return Word.find({userId: userId, eng:{ $regex: regex, $options: 'i' }});
 }
