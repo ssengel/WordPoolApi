@@ -1,8 +1,8 @@
 let auth = require('../controllers/authController');
 let word = require('../controllers/wordController');
 let pool =require('../controllers/poolController');
-let pWord = require('../controllers/pWordController');
-let operation = require('../controllers/operationController');
+let user = require('../controllers/userController');
+let explore = require('../controllers/exploreController');
 
 exports.mainRoute = (app) => {
 
@@ -10,29 +10,41 @@ exports.mainRoute = (app) => {
     app.post('/login', auth.login)
         .post('/register', auth.register)
 
+    // user
+    app.get('/user/userInfo', user.getUserInfo)
+        .post('/user/updateImage', user.uploadImage)
+
+        
     //word
-    app.get('/allWords', word.getAllWords)
-        .post('/word', word.createWord)
-        .get('/word/from/:from/to/:to',word.getWordsFromTo)
+    app.post('/word', word.createWord)
         .get('/word', word.getWords)
         .get('/word/:wordId', word.getWord)
         .get('/word/search/:key', word.getWordsByName)
+        .get('/word/from/:from/to/:to',word.getWordsFromTo)
         .delete('/word/:wordId', word.deleteWord)
         .put('/word/:wordId', word.updateWord)
+        .get('/word/random/:from/:to', word.getRandomWords)
 
-    //pool, pword
-    app.get('/pool', pool.getAllPools)
-        .post('/pool', pool.createPool)
-        .get('/pool/:poolId/pword', pWord.getPWordsByPoolId)
-        .post('/pool/:poolId/pword', pWord.createPWord)
-        .delete('/pool/:poolId/pword/:pWordId', pWord.deletePWord)
-        .put('/pool/:poolId/pword/:pWordId', pWord.updatePWord)
-        .get('/pword',pWord.getAllPWords)//test
+    //pool
+    app.post('/pool', pool.createPool)    
+        .get('/pool', pool.getPools)
+        .get('/pool/:poolId',pool.getPool)
+        .get('/pool/:poolId/word',word.getWordsByPoolId)// ?
+        .delete('/pool/:poolId', pool.deletePool)
+        .put('/pool/:poolId', pool.updatePool)
+        .get('/pool/:poolId/wordCount', pool.getWordCount)
+        .get('/pool/exampleWords')
 
-    //operations
-    app.get('/allOperations', operation.getAllOperations) // test 
-        .get('/operation', operation.getOperations)
-        .delete('/operation',operation.deleteOperations)
-        .delete('/operation/:operationId', operation.deleteOperation)
-        // .delete('/operation/word:wordId', operation.deleteOperationsByWordId)
+    //explore
+    app.get('/explore', explore.getAllPools)
+        .get('/explore/userInfo/:userId', explore.getUserInfo)
+        .get('/explore/pool/:poolId/word', explore.getWordsByPoolId)
+        .get('/explore/pool/:poolId/exampleWords', explore.getExampleWordByPoolId)
+        .get('/explore/pool/:poolId/copyPool', explore.copyPool)
+
+    // //operations
+    // app.get('/operation', operation.getOperations)
+    //     .delete('/operation',operation.deleteOperations)
+    //     .delete('/operation/:operationId', operation.deleteOperation)
+    //     // .delete('/operation/word:wordId', operation.deleteOperationsByWordId)
 }

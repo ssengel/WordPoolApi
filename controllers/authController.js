@@ -5,6 +5,8 @@ let config = require('../config');
 
 //veri tabani isleri dbo dosyasina tasinmali 
 let User = require('../models/User');
+let Pool = require('../models/Pool');
+let Word = require('../models/Word');
 
 
 //Login User
@@ -52,7 +54,18 @@ exports.register = (req, res, next) => {
         role: "normal"
     }, (err, user) => {
         if (err) return res.status(500).send( err );
+        firstEntry(user)
         res.status(200).send(user);
     });
 
 };
+
+firstEntry = async (user) =>{
+    let newPool =new Pool ({
+        userId: user._id,
+        name: user.username,
+        color: "#4284f3"
+    })
+    let p = await newPool.save();
+    await Word.create({userId: p.userId, poolId: p._id, eng: "Hello", tr: "merhaba", sentence:"Hello Everybody"})
+}

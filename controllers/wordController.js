@@ -1,69 +1,70 @@
 let WordDBO = require("../dbOperations/wordDBO");
 let badRequest = require("../helpers/badRequestError");
-let OperationDBO = require('../dbOperations/operationDBO');
 let to = require('../helpers/to');
 
 
 exports.createWord = async (req, res, next) => {
 
   const userId = req.user._id;
-  let mWord = req.body;
+  const poolId = req.body.poolId;
+  let data = req.body;
 
-  if (!mWord.eng || !mWord.tr) {
+  if (!data.eng || !data.tr || !data.poolId) {
     return next(badRequest("Kelimenin Bazi Bilgileri Eksik !!"));
   }
 
-  [err, word] = await to(WordDBO.createWord(mWord, userId));
+  [err, createdWord] = await to(WordDBO.createWord(data, userId, poolId));
   if (err) next(err);
-
-  if (req.headers['device'] === 'angular') {
-    [err, op] = await to(OperationDBO.createOperation(userId, word._id, "insert"));
-    if (err) next(err);
-  }
-
-  res.status(200).send(word);
+  res.status(200).send(createdWord);
 
 };
 
-exports.getAllWords = (req, res, next) => {
-  WordDBO.getAllWords()
-    .then(words => {
-      res.status(200).send(words);
-    })
-    .catch(err => {
-      next(err);
-    });
-};
-
-exports.getWords = (req, res, next) => {
+exports.getWords = async (req, res, next) => {
 
   const userId = req.user._id;
-
-  WordDBO.getWords(userId)
-    .then(words => {
-      res.status(200).send(words);
-    })
-    .catch(err => {
-      next(err);
-    });
+  [err, data] = await to(WordDBO.getWords(userId));
+  
+  if(err) next(err);
+  res.status(200).send(data);
 };
 
-exports.getWord = (req, res, next) => {
+exports.getWordsByPoolId = async (req, res, next) => {
+
+  const userId = req.user._id;
+  const poolId = req.params.poolId;
+
+
+  [err, data] = await to(WordDBO.getWordsByPoolId(userId, poolId));
+  if(err) next(err)
+  res.status(200).send(data);
+
+};
+
+exports.getWord = async (req, res, next) => {
 
   const userId = req.user._id;
   const wordId = req.params.wordId;
 
-  WordDBO.getWord(userId, wordId)
-    .then(word => {
-      res.status(200).send(word);
-    })
-    .catch(err => {
-      next(err);
-    });
+  [err, data] = await to(WordDBO.getWord(userId, wordId));
+  if(err) next(err)
+  res.status(200).send(data);
+
+
 };
 
-exports.updateWord = (req, res, next) => {
+exports.deleteWord = async (req, res, next) => {
 
+  const userId = req.user._id;
+  const wordId = req.params.wordId;
+
+  [err, data] = await to(WordDBO.deleteWord(userId, wordId));
+  if(err) next(err)
+  res.status(200).send(data);
+  
+};
+
+exports.updateWord = async (req, res, next) => {
+  console.log(req.body)
   const userId = req.user._id;
   const wordId = req.params.wordId;
   const mWord = req.body;
@@ -72,40 +73,15 @@ exports.updateWord = (req, res, next) => {
     return next(badRequest("Kelimenin Bazi Bilgileri Eksik !!"));
   }
 
-  WordDBO.updateWord(userId, wordId, mWord)
-    .then(word => {
-      if (req.headers['device'] === 'angular') {
-        OperationDBO.createOperation(userId, word._id, "update")
-      }
-      res.status(200).send(word);
-    })
-    .catch(err => {
-      next(err);
-    });
+  [err, data] = await to(WordDBO.updateWord(userId, wordId, mWord));
+  if(err) next(err)
+  res.status(200).send(data);
+
 };
 
-exports.deleteWord = (req, res, next) => {
-
-  const userId = req.user._id;
-  const wordId = req.params.wordId;
-
-  WordDBO.deleteWord(userId, wordId)
-    .then(word => {
-      OperationDBO.deleteOperationsByWordId(userId, wordId)
-        .then(op => {
-          if (req.headers['device'] === 'angular') {
-            OperationDBO.createOperation(userId, word._id, "delete")
-          }
-          res.status(200).send(word);
-        })
-    })
-    .catch(err => {
-      next(err);
-    });
-};
 
 exports.getWordsFromTo = async (req, res, next) => {
-  
+
   const userId = req.user._id;
   const from = Number(req.params.from);
   const too = Number(req.params.to);
@@ -117,13 +93,28 @@ exports.getWordsFromTo = async (req, res, next) => {
   res.status(200).send(data);
 }
 
-exports.getWordsByName = async (req, res, next)=>{
+exports.getWordsByName = async (req, res, next) => {
   const userId = req.user._id;
   const key = req.params.key;
 
-  [err, data] = await to (WordDBO.getWordsByName(userId,key));
+  [err, data] = await to(WordDBO.getWordsByName(userId, key));
   if (err) {
     return next(err);
-  }  
+  }
   res.status(200).send(data);
 }
+
+exports.getRandomWords = async (req, res, next) => {
+
+  const from = Number(req.params.from);
+  const too = Number(req.params.to);
+
+  [err, data] = await to(WordDBO.getRandomWords(from, too));
+  if (err) {
+    return next(err);
+  }
+  res.status(200).send(data);
+}
+
+
+

@@ -6,6 +6,17 @@ let UserSchema = new Schema({
     email: String,
     password: String,
     role: String,
+    image: {
+        path: {
+            type: String,
+            trim: true,
+            default:"publicImages/profile.jpeg"
+        },
+        originalname: {
+            type: String,
+            default: "profile.jpeg"
+        }
+    },
     createdAt: {type: String, default:new Date().toString()}
 }, { versionKey: false });
 

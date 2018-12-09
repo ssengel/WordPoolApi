@@ -12,23 +12,19 @@ let {MongoError} = require('mongodb');
 let mongoose = require('mongoose')
 
 
-
-
 //middleware
+app.use("/publicImages", express.static(path.resolve(__dirname, 'publicImages')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cors())
 app.use(tokenController);
 
-app.use((req, res, next) =>{
-    if(!req.body)
-        console.log(req.body)
-    next()
-})
 
 //routes
 routes.mainRoute(app);
+
+
 
 // error handling
 app.use((err, req, res, next) => {
