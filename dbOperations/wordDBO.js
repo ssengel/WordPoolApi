@@ -10,7 +10,7 @@ exports.createWord = (data, userId, poolId) => {
 }
 
 exports.getWords = (userId) => {
-    return Word.find({userId: userId})
+    return Word.find({userId: userId}).sort({createdAt: -1}).exec()
 }
 
 exports.getWordsByPoolId = (userId, poolId) => {
@@ -26,14 +26,14 @@ exports.deleteWord = (userId, wordId) =>{
 }
 
 exports.updateWord = (userId, wordId, word) =>{
-    return Word.findOneAndUpdate({userId: userId, _id: wordId}, word);
+    return Word.findOneAndUpdate({userId: userId, _id: wordId}, word, {new: true});
 }
 
 exports.getWordsFromTo = (userId, from, to) => {
     
     return new Promise((resolve, reject) =>{
 
-        let f1 = Word.find({userId:userId}).skip(from).limit(to-from);
+        let f1 = Word.find({userId:userId}).sort({createdAt: -1}).skip(from).limit(to-from);
         let f2 = Word.countDocuments({userId: userId});
 
         Promise.all([f1, f2])
@@ -59,6 +59,10 @@ exports.getWordCountByPoolId = ( poolId) =>{
 exports.getRandomWords = (from, to) => {
     // return Word.find().sort({createdAt: -1}).skip(from).limit(to-from);    
     return Word.find().sort({createdAt: -1}).limit(to-from); 
+}
+
+exports.getTotalWordCount = (userId) =>{
+    return Word.countDocuments({userId: userId}).exec()
 }
 
 

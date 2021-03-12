@@ -1,8 +1,11 @@
 let to = require('../helpers/to');
 let UserDBO = require('../dbOperations/userDBO');
-
 let imageUpload = require('../helpers/imageUpload');
 let User = require('../models/User')
+
+let WordDBO = require('../dbOperations/wordDBO');
+let PoolDBO = require('../dbOperations/poolDBO');
+let SubscriptionDBO = require('../dbOperations/subscriptionDBO');
 
 exports.getUserInfo = async (req, res, next) =>{
     const userId = req.user._id;
@@ -33,3 +36,25 @@ exports.uploadImage = (req, res, next) => {
         }
     });
 };
+
+exports.getStatistic = async (req, res, next) =>{
+    const userId = req.user._id;
+    
+    const task_1 = WordDBO.getTotalWordCount;
+    const task_2 = PoolDBO.getTotalPoolCount;
+    const task_3 = SubscriptionDBO.getSubscriptionCount;
+
+    [err, [wordCount, poolcount, subCount]] = await to(Promise.all([
+        task_1(userId),
+        task_2(userId),
+        task_3(userId)
+    ]))
+
+    if(err) return next(err);
+    res.status(200).send({
+        totalWordCount: wordCount,
+        totalPoolCount: poolcount,
+        totalSubscriptionCount: subCount
+    })
+    
+}

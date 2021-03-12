@@ -35,5 +35,9 @@ exports.updatePool = async (poolId) =>{
     return Pool.findOneAndUpdate({_id: poolId});
 }
 
+exports.getTotalPoolCount = (userId) =>{
+    return Pool.countDocuments({userId: userId}).exec()
+}
+
 
 

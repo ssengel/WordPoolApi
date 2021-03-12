@@ -1,7 +1,7 @@
 let Pool = require('../models/Pool');
 let User = require('../models/User');
 let Word = require('../models/Word');
-let Op = require('../models/Op');
+let Subscription = require('../models/Subscription');
 let to = require('../helpers/to');
 
 exports.getAllPools = (userId) =>{
@@ -20,56 +20,70 @@ exports.getExampleWordByPoolId = (poolId) => {
     return Word.find({poolId: poolId}).limit(3);
 }
 
-exports.copyPool = async (userId,poolId) =>{
+exports.subscribe = async (userId,poolId) =>{
 
-        getPool = Pool.findById(poolId);
-        getWords = Word.find({poolId: poolId});
+        // getPool = Pool.findById(poolId);
+        // getWords = Word.find({poolId: poolId});
 
-        [err, [oldPool, oldWords]] = await to(Promise.all([getPool,getWords]))
-        if(err) throw err;
+        // [err, [oldPool, oldWords]] = await to(Promise.all([getPool,getWords]))
+        // if(err) throw err;
         
-        [err,newPool] = await to(Pool.create({userId: userId, name: oldPool.name, color: oldPool.color }))
-        if(err) throw err;
+        // [err,newPool] = await to(Pool.create({userId: userId, name: oldPool.name, color: oldPool.color }))
+        // if(err) throw err;
         
-        let newWords = oldWords.slice(0)
+        // let newWords = oldWords.slice(0)
 
+        // //array.map kullanilabilirmiydi  ?
         // for (let i = 0; i < newWords.length; i++) {
-        //     let w = newWords[i];
-        //     w.userId = userId;
-        //     w.poolId = newPool._id;
-        //     w._id = undefined;
-        //     let x;
-        //     [err, x] = await to(Word.collection.insertOne(w));
-        //     if(err) throw err;
+        //     newWords[i].userId = userId;
+        //     newWords[i].poolId = newPool._id;
+        //     newWords[i]._id = undefined;
         // }
+        // let x;
+        // [err, x] = await to(Word.collection.insertMany(newWords));
+        // if(err) throw err;
 
-        // newWords.forEach(async w => {
-        //     w.userId = userId;
-        //     w.poolId = newPool._id;
-        //     w._id = undefined;
-        //     const word = new Word(w)
-        //     try {
-        //         await Word.collection.insertOne(word);
-        //     } catch (err) {
-        //         return Promise.reject(err)          
-        //     }
-        // });
-
-        //array.map kullanilabilirmiydi  ?
-        for (let i = 0; i < newWords.length; i++) {
-            newWords[i].userId = userId;
-            newWords[i].poolId = newPool._id;
-            newWords[i]._id = undefined;
-        }
-        let x;
-        [err, x] = await to(Word.collection.insertMany(newWords));
+        [err,pool] = await to(Pool.findById(poolId).exec());
         if(err) throw err;
 
-        [err, x] = await to(Op.create({userId: userId, poolId:poolId}));
+        let data;
+        [err, data] = await to(Subscription.create({userId: userId, poolId:poolId, subscribedUserId:pool.userId}));
         
         return Promise.resolve({result: "ok"})
 
+}
 
+exports.checkSubscription = async (userId,poolId) =>{
+    let err, data;
+    [err, data] = await to(Subscription.findOne({userId: userId, poolId:poolId}));
+    if(err) throw err;
+    return Promise.resolve({subscription: data});
+}
+
+exports.unSubscribe = async (userId, poolId) =>{
+    let err, data;
+    [err, data] = await to(Subscription.deleteOne({userId: userId, poolId: poolId}))
+    if(err) throw err;
+    return Promise.resolve({result: "ok"})
+}
+
+exports.getSubscribedPools = async (userId) =>{
+    return Subscription.find({userId: userId})
+                .populate('poolId')
+                .exec()
+}
+
+exports.mblGetAllPools = (userId) =>{
+    return Pool.find({ userId: {$ne: userId}})
+                .populate('userId')
+                .exec()
+}
+
+exports.mblGetSubscriptions = (userId) =>{
+    return Subscription.find({userId: userId})
+                        .populate('subscribedUserId')
+                        .populate('poolId')
+                        .exec();
 }
 
 

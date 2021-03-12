@@ -13,17 +13,19 @@ exports.mainRoute = (app) => {
     // user
     app.get('/user/userInfo', user.getUserInfo)
         .post('/user/updateImage', user.uploadImage)
-
+        .get('/user/statistic', user.getStatistic)
         
     //word
     app.post('/word', word.createWord)
         .get('/word', word.getWords)
+        .get('/word/totalWordCount', word.getTotalWordCount)
         .get('/word/:wordId', word.getWord)
         .get('/word/search/:key', word.getWordsByName)
         .get('/word/from/:from/to/:to',word.getWordsFromTo)
         .delete('/word/:wordId', word.deleteWord)
         .put('/word/:wordId', word.updateWord)
         .get('/word/random/:from/:to', word.getRandomWords)
+        
 
     //pool
     app.post('/pool', pool.createPool)    
@@ -40,11 +42,13 @@ exports.mainRoute = (app) => {
         .get('/explore/userInfo/:userId', explore.getUserInfo)
         .get('/explore/pool/:poolId/word', explore.getWordsByPoolId)
         .get('/explore/pool/:poolId/exampleWords', explore.getExampleWordByPoolId)
-        .get('/explore/pool/:poolId/copyPool', explore.copyPool)
+        .get('/explore/pool/:poolId/subscribe', explore.subscribe)
+        .delete('/explore/pool/:poolId/unSubscribe', explore.unSubscribe)
+        .get('/explore/pool/:poolId/checkSubscription', explore.checkSubscription)
+        .get('/explore/getSubscribedPools', explore.getSubscribedPools)
 
-    // //operations
-    // app.get('/operation', operation.getOperations)
-    //     .delete('/operation',operation.deleteOperations)
-    //     .delete('/operation/:operationId', operation.deleteOperation)
-    //     // .delete('/operation/word:wordId', operation.deleteOperationsByWordId)
+    //explore mobile
+    app.get('/mbl/explore', explore.mblGetAllPools)
+        .get('/mbl/explore/subscription', explore.mblGetSubscriptions)
+    
 }

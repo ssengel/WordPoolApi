@@ -116,5 +116,13 @@ exports.getRandomWords = async (req, res, next) => {
   res.status(200).send(data);
 }
 
+exports.getTotalWordCount = async (req, res, next) =>{
+  const userId = req.user._id;
+
+  [err, data] = await to(WordDBO.getTotalWordCount(userId));
+  if(err) return next(err)
+  res.status(200).send({totalWordCount: data});
+}
+
 
 

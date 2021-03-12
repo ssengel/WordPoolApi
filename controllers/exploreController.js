@@ -35,14 +35,67 @@ exports.getExampleWordByPoolId = async (req, res, next)=> {
     if (err) {
       return next(err);
     }
+    
     res.status(200).send(data);
 }
 
-exports.copyPool = async (req, res, next) =>{
+exports.subscribe = async (req, res, next) =>{
     const userId = req.user._id;
     const poolId = req.params.poolId;
 
-    [err, data] = await to(ExploreDBO.copyPool(userId, poolId));
+    [err, data] = await to(ExploreDBO.subscribe(userId, poolId));
     if (err) return next(err);
+    res.status(200).send(data);
+}
+
+exports.checkSubscription = async (req, res, next) =>{
+    const userId = req.user._id;
+    const poolId = req.params.poolId;
+
+    [err, data] = await to(ExploreDBO.checkSubscription(userId, poolId));
+    if (err) return next(err);
+    res.status(200).send(data);
+}
+
+exports.unSubscribe = async (req, res, next) =>{
+    const userId = req.user._id;
+    const poolId = req.params.poolId;
+
+    [err, data] = await to(ExploreDBO.unSubscribe(userId, poolId));
+    if (err) return next(err);
+    res.status(200).send(data);
+}
+
+exports.getSubscribedPools = async (req, res, next) =>{
+    const userId = req.user._id;
+    let pools = [];
+
+    [err, data] = await to(ExploreDBO.getSubscribedPools(userId));
+    if (err) return next(err);
+    
+    for (let i = 0; i < data.length; i++) {
+        pools.push(data[i].poolId);
+    }
+    res.status(200).send(pools);
+}
+
+exports.mblGetAllPools = async (req, res, next) =>{
+    const userId = req.user._id;
+    
+    [err, data] = await to(ExploreDBO.mblGetAllPools(userId));
+    let result = JSON.parse(JSON.stringify(data));
+    delete result[0].userId;
+
+    console.log(result)
+    if(err) next(err);
+    res.status(200).send(data);
+}
+
+exports.mblGetSubscriptions = async (req, res, next) =>{
+    const userId = req.user._id;
+
+    [err, data] = await to(ExploreDBO.mblGetSubscriptions(userId));
+    if(err) next(err);
+    console.log(data)
     res.status(200).send(data);
 }
